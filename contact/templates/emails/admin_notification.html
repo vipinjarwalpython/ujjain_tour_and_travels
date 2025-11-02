@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Customer Inquiry - Tour & Travels</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: #2c3e50;
+            background-color: #f0f2f5;
+        }
+        .email-container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: '🎯';
+            font-size: 48px;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            font-size: 15px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+        .urgency-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 18px 30px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .urgency-banner .icon {
+            font-size: 20px;
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .inquiry-summary {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+            border-left: 5px solid #667eea;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+        .inquiry-id-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 35px 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .info-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        .info-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+        .info-value {
+            font-size: 16px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .info-value a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .info-value a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .inquiry-type-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .message-container {
+            background: #fffbf0;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            position: relative;
+        }
+        .message-container::before {
+            content: '💬';
+            font-size: 32px;
+            position: absolute;
+            top: -16px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+        }
+        .message-header {
+            color: #856404;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .message-text {
+            color: #495057;
+            line-height: 1.8;
+            font-size: 15px;
+            white-space: pre-wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 3px solid #ffc107;
+        }
+        .action-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 35px;
+            border-radius: 10px;
+            margin: 35px 0;
+            text-align: center;
+        }
+        .action-section h3 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        .btn {
+            display: inline-block;
+            padding: 16px 32px;
+            margin: 8px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+            color: #ffffff;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(23, 162, 184, 0.4);
+        }
+        .quick-actions {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .quick-actions h4 {
+            color: #1976d2;
+            font-size: 17px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+        .action-checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .action-checklist li {
+            padding: 12px 0;
+            color: #2c3e50;
+            border-bottom: 1px solid rgba(25, 118, 210, 0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .action-checklist li:last-child {
+            border-bottom: none;
+        }
+        .action-checklist li::before {
+            content: '✓';
+            background: #1976d2;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .response-tips {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%);
+            border-left: 4px solid #ffc107;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+        }
+        .response-tips h4 {
+            color: #856404;
+            font-size: 17px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+        .tips-list li {
+            padding: 10px 0;
+            color: #495057;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+        }
+        .tips-list li::before {
+            content: '💡';
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .customer-context {
+            background: linear-gradient(135deg, #f0fff4 0%, #dcfce7 100%);
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .customer-context h4 {
+            color: #065f46;
+            font-size: 17px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .customer-context h4::before {
+            content: '🎯';
+            font-size: 24px;
+        }
+        .customer-context p {
+            color: #047857;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+        .footer {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            padding: 35px 30px;
+            text-align: center;
+        }
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer p {
+            font-size: 13px;
+            opacity: 0.9;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        .footer-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+        .timestamp {
+            color: #6c757d;
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 8px;
+            }
+            .content {
+                padding: 25px 20px;
+            }
+            .btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>New Customer Inquiry Received</h1>
+            <p>A potential customer needs your attention</p>
+        </div>
+        
+        <!-- Urgency Banner -->
+        <div class="urgency-banner">
+            <span class="icon">⚡</span>
+            <span>ACTION REQUIRED: Please respond within 24 hours</span>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="content">
+            <p class="greeting">Hello Admin Team,</p>
+            
+            <p style="color: #495057; font-size: 15px; line-height: 1.8; margin-bottom: 25px;">
+                A new customer has reached out to us through our website. They're interested in our services 
+                and are waiting for your response. Please review the details below and take appropriate action.
+            </p>
+            
+            <!-- Inquiry Summary -->
+            <div class="inquiry-summary">
+                <span class="inquiry-id-badge">📋 Inquiry #{{ inquiry_id }}</span>
+                <p style="color: #495057; font-size: 14px; margin-top: 10px;">
+                    Submitted on {{ created_at|date:"F d, Y at h:i A" }}
+                </p>
+            </div>
+            
+            <!-- Customer Information -->
+            <h3 class="section-title">👤 Customer Details</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">{{ name }}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">
+                        <a href="mailto:{{ email }}">{{ email }}</a>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">
+                        <a href="tel:{{ phone }}">{{ phone }}</a>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Inquiry Category</div>
+                    <div class="info-value">
+                        <span class="inquiry-type-badge">{{ inquiry_type }}</span>
+                    </div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Subject</div>
+                    <div class="info-value" style="font-weight: 600; color: #667eea;">
+                        {{ subject }}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customer Message -->
+            <h3 class="section-title">💬 What the Customer Said</h3>
+            <div class="message-container">
+                <div class="message-header">Customer's Message:</div>
+                <div class="message-text">{{ message }}</div>
+            </div>
+            
+            <!-- Customer Context -->
+            <div class="customer-context">
+                <h4>Why This Matters</h4>
+                <p>
+                    This customer has taken the time to reach out to us specifically. They're actively 
+                    looking for travel solutions and have chosen Tour & Travels as a potential partner. 
+                    A prompt, personalized response will significantly increase the chances of converting 
+                    this inquiry into a booking. Remember, they might be comparing multiple travel agencies!
+                </p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-section">
+                <h3>Take Action Now</h3>
+                <a href="http://127.0.0.1:8000/admin/contact/contactinquiry/{{ inquiry_id }}/change/" class="btn btn-primary">
+                    👁️ View Full Details in Admin
+                </a>
+                <a href="mailto:{{ email }}?subject=Re: {{ subject }}&body=Dear {{ name }},%0D%0A%0D%0AThank you for contacting Tour %26 Travels.%0D%0A%0D%0A" class="btn btn-secondary">
+                    📧 Reply to Customer Now
+                </a>
+            </div>
+            
+            <!-- Quick Action Checklist -->
+            <div class="quick-actions">
+                <h4>📝 Your Action Plan (Complete in Order)</h4>
+                <ul class="action-checklist">
+                    <li>
+                        <span><strong>Step 1:</strong> Open the inquiry in admin panel and review all details carefully</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 2:</strong> Update inquiry status to "In Progress" to track it</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 3:</strong> Research the best package/solution for their specific needs</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 4:</strong> Draft a personalized email response with specific details</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 5:</strong> Include pricing, availability, and any special offers</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 6:</strong> Send response within 24 hours (ideally within 12 hours)</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 7:</strong> Set a reminder to follow up in 2-3 days if no reply</span>
+                    </li>
+                    <li>
+                        <span><strong>Step 8:</strong> Mark as "Resolved" once customer is satisfied</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Response Tips -->
+            <div class="response-tips">
+                <h4>💡 Tips for a Great Response</h4>
+                <ul class="tips-list">
+                    <li>Start with a warm greeting using their name - make it personal!</li>
+                    <li>Thank them for choosing Tour & Travels and acknowledge their specific inquiry</li>
+                    <li>Address each point they mentioned in their message</li>
+                    <li>Provide specific package details, pricing, and availability dates</li>
+                    <li>Mention any current promotions or discounts that apply</li>
+                    <li>Include testimonials or photos if relevant to their interest</li>
+                    <li>Add your direct phone number and WhatsApp for quick communication</li>
+                    <li>Set clear next steps and encourage them to ask questions</li>
+                    <li>Use a friendly, enthusiastic tone that shows your passion for travel</li>
+                    <li>Proofread before sending - professionalism builds trust!</li>
+                </ul>
+            </div>
+            
+            <!-- Reminder Box -->
+            <div style="background: linear-gradient(135deg, #fee 0%, #fdd 100%); border: 2px solid #f44336; border-radius: 10px; padding: 25px; text-align: center; margin: 30px 0;">
+                <div style="font-size: 32px; margin-bottom: 10px;">⏰</div>
+                <h4 style="color: #c62828; font-size: 18px; margin-bottom: 10px; font-weight: 600;">
+                    Time is of the Essence!
+                </h4>
+                <p style="color: #d32f2f; line-height: 1.6; font-size: 14px;">
+                    Studies show that responding within 1 hour increases conversion rates by <strong>60%</strong>. 
+                    Customers who don't receive a response within 24 hours are <strong>7x more likely</strong> to 
+                    choose a competitor. Make this customer feel valued by responding promptly!
+                </p>
+            </div>
+            
+            <p style="color: #495057; font-size: 15px; line-height: 1.8; margin-top: 30px;">
+                This is an exciting opportunity to showcase our excellent customer service and expertise. 
+                Let's turn this inquiry into a memorable journey for our new customer!
+            </p>
+            
+            <p style="color: #2c3e50; font-size: 15px; font-weight: 600; margin-top: 25px;">
+                Best regards,<br>
+                Tour & Travels Notification System
+            </p>
+            
+            <p class="timestamp">
+                ⏱️ This notification was sent automatically at {{ created_at|date:"h:i A" }} on {{ created_at|date:"F d, Y" }}
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-logo">Tour & Travels</div>
+            <p style="font-size: 14px; font-weight: 500;">Admin Notification System</p>
+            <div class="footer-divider"></div>
+            <p>
+                This is an automated notification from your Tour & Travels inquiry management system.
+            </p>
+            <p>
+                For technical support or system issues, contact: <a href="mailto:tech@tourtravels.com" style="color: #667eea; text-decoration: none;">tech@tourtravels.com</a>
+            </p>
+            <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                © {{ year }} Tour & Travels. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

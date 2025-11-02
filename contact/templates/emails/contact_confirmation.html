@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Confirmation - Tour & Travels</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .message-text {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+        .info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .info-row {
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #764ba2;
+            display: inline-block;
+            width: 140px;
+        }
+        .info-value {
+            color: #333;
+        }
+        .message-preview {
+            background: #fff9e6;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            border-radius: 30px;
+            margin: 25px 0;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+        .contact-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 25px 0;
+        }
+        .contact-info h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .contact-info ul {
+            list-style: none;
+        }
+        .contact-info li {
+            padding: 8px 0;
+            color: #555;
+        }
+        .contact-info li strong {
+            color: #764ba2;
+        }
+        .footer {
+            background: #2c3e50;
+            color: #ffffff;
+            padding: 30px;
+            text-align: center;
+        }
+        .footer h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .footer p {
+            font-size: 14px;
+            opacity: 0.8;
+            margin: 5px 0;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            color: #ffffff;
+            text-decoration: none;
+            margin: 0 10px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            transition: background 0.3s ease;
+        }
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #667eea, transparent);
+            margin: 30px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="header">
+            <h1>🌍 Tour & Travels</h1>
+            <p>Your Journey Begins Here</p>
+        </div>
+        
+        <div class="content">
+            <p class="greeting">Dear {{ name }},</p>
+            
+            <p class="message-text">
+                Thank you for reaching out to <strong>Tour & Travels</strong>! We have successfully 
+                received your inquiry and our dedicated team is already reviewing it.
+            </p>
+            
+            <p class="message-text">
+                We understand that planning the perfect trip is important to you, and we're committed 
+                to providing you with the best travel solutions tailored to your needs.
+            </p>
+            
+            <div class="divider"></div>
+            
+            <div class="info-box">
+                <h3>📋 Your Inquiry Details</h3>
+                <div class="info-row">
+                    <span class="info-label">Inquiry ID:</span>
+                    <span class="info-value"><strong>#{{ inquiry_id }}</strong></span>
+                    <span class="badge">NEW</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Category:</span>
+                    <span class="info-value">{{ inquiry_type }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Subject:</span>
+                    <span class="info-value"><strong>{{ subject }}</strong></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Your Message:</span>
+                </div>
+                <div class="message-preview">
+                    {{ message }}
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="https://tourtravels.com/packages" class="cta-button">
+                    Explore Our Packages 🎒
+                </a>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <h3 style="color: #667eea; margin-bottom: 15px;">⏱️ What Happens Next?</h3>
+            <ol style="color: #555; line-height: 2;">
+                <li>Our travel experts will review your inquiry within <strong>24-48 hours</strong></li>
+                <li>You'll receive a personalized response via email</li>
+                <li>We'll provide detailed information and recommendations</li>
+                <li>Our team will assist you in planning your perfect journey</li>
+            </ol>
+            
+            <div class="contact-info">
+                <h3>📞 Need Immediate Assistance?</h3>
+                <p style="margin-bottom: 15px;">Our team is here to help you!</p>
+                <ul>
+                    <li><strong>📧 Email:</strong> support@tourtravels.com</li>
+                    <li><strong>📱 Phone:</strong> +91 1234567890</li>
+                    <li><strong>💬 WhatsApp:</strong> +91 9876543210</li>
+                    <li><strong>⏰ Working Hours:</strong> Mon-Sat, 9:00 AM - 6:00 PM IST</li>
+                    <li><strong>📍 Address:</strong> 123 Travel Street, Tourism Hub, India</li>
+                </ul>
+            </div>
+            
+            <p class="message-text" style="margin-top: 30px;">
+                Thank you for choosing <strong>Tour & Travels</strong>. We look forward to making 
+                your travel dreams come true! ✈️
+            </p>
+            
+            <p class="message-text">
+                <strong>Best regards,</strong><br>
+                The Tour & Travels Team
+            </p>
+        </div>
+        
+        <div class="footer">
+            <h3>Tour & Travels</h3>
+            <p>Making Your Travel Dreams Come True Since 2010</p>
+            
+            <div class="social-links">
+                <a href="https://facebook.com/tourtravels">Facebook</a>
+                <a href="https://instagram.com/tourtravels">Instagram</a>
+                <a href="https://twitter.com/tourtravels">Twitter</a>
+                <a href="https://linkedin.com/company/tourtravels">LinkedIn</a>
+            </div>
+            
+            <div class="divider" style="background: rgba(255,255,255,0.2);"></div>
+            
+            <p style="font-size: 12px; margin-top: 15px; opacity: 0.7;">
+                © {{ year }} Tour & Travels. All rights reserved.<br>
+                This is an automated email. Please do not reply directly to this message.<br>
+                If you did not submit this inquiry, please contact us immediately.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
