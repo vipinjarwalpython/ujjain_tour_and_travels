@@ -8,11 +8,13 @@ from django.views.decorators.vary import vary_on_headers
 from django.db.models import Count, Q
 from django.utils import timezone
 from datetime import timedelta
-from .models import ContactInquiry
+from .models import ContactInquiry, Review
 from .serializers import (
     ContactInquirySerializer,
     ContactInquiryStatusUpdateSerializer,
     ContactInquiryStatsSerializer,
+    ReviewSerializer,
+    ReviewStatusUpdateSerializer,
 )
 from .utils import send_contact_confirmation_email, send_admin_notification_email
 import logging
@@ -76,7 +78,7 @@ class ContactInquiryViewSet(viewsets.ModelViewSet):
             return Response(cached_data)
 
         # If not in cache, get from database
-        logger.info(f"❌ Cache miss for inquiry #{pk}, fetching from database")
+        logger.info(f"Cache miss for inquiry #{pk}, fetching from database")
         response = super().retrieve(request, *args, **kwargs)
 
         # Store in cache for 5 minutes
@@ -291,3 +293,310 @@ class ContactInquiryViewSet(viewsets.ModelViewSet):
                 "data": serializer.data,
             }
         )
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing Customer Reviews with full CRUD operations
+
+    Endpoints:
+    - list: GET /api/reviews/
+    - create: POST /api/reviews/
+    - retrieve: GET /api/reviews/{id}/
+    - update: PUT /api/reviews/{id}/
+    - partial_update: PATCH /api/reviews/{id}/
+    - destroy: DELETE /api/reviews/{id}/
+    - update_status: POST /api/reviews/{id}/update-status/
+    - statistics: GET /api/reviews/statistics/
+    - approved: GET /api/reviews/approved/
+    - featured: GET /api/reviews/featured/
+    - by_destination: GET /api/reviews/by-destination/?destination=goa
+    """
+
+    queryset = Review.objects.filter(is_active=True)
+    serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        """Filter queryset based on query parameters"""
+        queryset = Review.objects.filter(is_active=True)
+
+        # Filter by status
+        status = self.request.query_params.get("status", None)
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Filter by rating
+        rating = self.request.query_params.get("rating", None)
+        if rating:
+            queryset = queryset.filter(rating=rating)
+
+        # Filter by destination
+        destination = self.request.query_params.get("destination", None)
+        if destination:
+            queryset = queryset.filter(destination=destination)
+
+        return queryset
+
+    def get_cache_key(self, identifier="list", **kwargs):
+        """Generate cache key"""
+        if identifier == "list":
+            return "reviews_list"
+        elif identifier == "detail":
+            return f'review_{kwargs.get("pk")}'
+        elif identifier == "stats":
+            return "review_statistics"
+        elif identifier == "approved":
+            return "reviews_approved"
+        elif identifier == "featured":
+            return "reviews_featured"
+        return f"review_{identifier}"
+
+    @method_decorator(cache_page(60 * 10))  # Cache for 10 minutes
+    @method_decorator(vary_on_headers("Authorization"))
+    def list(self, request, *args, **kwargs):
+        """List all reviews with caching"""
+        logger.info("Fetching list of reviews")
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        """Retrieve single review with caching"""
+        pk = kwargs.get("pk")
+        cache_key = self.get_cache_key("detail", pk=pk)
+
+        cached_data = cache.get(cache_key)
+        if cached_data:
+            logger.info(f"Cache hit for review #{pk}")
+            return Response(cached_data)
+
+        logger.info(f"Cache miss for review #{pk}")
+        response = super().retrieve(request, *args, **kwargs)
+        cache.set(cache_key, response.data, 60 * 10)
+
+        return response
+
+    def create(self, request, *args, **kwargs):
+        """Create new review"""
+        logger.info("Creating new review")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        review = serializer.save()
+        logger.info(f"Review #{review.id} created successfully")
+
+        # Clear cache
+        cache.delete(self.get_cache_key("list"))
+        cache.delete(self.get_cache_key("stats"))
+        cache.delete(self.get_cache_key("approved"))
+
+        # Optional: Send notification email to admin about new review
+        # send_review_notification_email(review)
+
+        return Response(
+            {
+                "status": "success",
+                "message": "Thank you for your review! It will be published after approval.",
+                "data": serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def update(self, request, *args, **kwargs):
+        """Update review"""
+        pk = kwargs.get("pk")
+        logger.info(f"Updating review #{pk}")
+
+        response = super().update(request, *args, **kwargs)
+
+        # Clear cache
+        cache.delete(self.get_cache_key("detail", pk=pk))
+        cache.delete(self.get_cache_key("list"))
+        cache.delete(self.get_cache_key("stats"))
+        cache.delete(self.get_cache_key("approved"))
+        cache.delete(self.get_cache_key("featured"))
+
+        return response
+
+    def partial_update(self, request, *args, **kwargs):
+        """Partially update review"""
+        pk = kwargs.get("pk")
+        logger.info(f"Partially updating review #{pk}")
+
+        response = super().partial_update(request, *args, **kwargs)
+
+        # Clear cache
+        cache.delete(self.get_cache_key("detail", pk=pk))
+        cache.delete(self.get_cache_key("list"))
+        cache.delete(self.get_cache_key("stats"))
+        cache.delete(self.get_cache_key("approved"))
+        cache.delete(self.get_cache_key("featured"))
+
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        """Soft delete review"""
+        pk = kwargs.get("pk")
+        instance = self.get_object()
+
+        logger.info(f"Soft deleting review #{pk}")
+        instance.is_active = False
+        instance.save()
+
+        # Clear cache
+        cache.delete(self.get_cache_key("detail", pk=pk))
+        cache.delete(self.get_cache_key("list"))
+        cache.delete(self.get_cache_key("stats"))
+        cache.delete(self.get_cache_key("approved"))
+        cache.delete(self.get_cache_key("featured"))
+
+        return Response(
+            {"status": "success", "message": "Review deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    @action(detail=True, methods=["post"], url_path="update-status")
+    def update_status(self, request, pk=None):
+        """Update review status (approve/reject)"""
+        review = self.get_object()
+        serializer = ReviewStatusUpdateSerializer(data=request.data)
+
+        if serializer.is_valid():
+            review.status = serializer.validated_data["status"]
+            if "admin_notes" in serializer.validated_data:
+                review.admin_notes = serializer.validated_data["admin_notes"]
+            if "is_featured" in serializer.validated_data:
+                review.is_featured = serializer.validated_data["is_featured"]
+            review.save()
+
+            # Clear cache
+            cache.delete(self.get_cache_key("detail", pk=pk))
+            cache.delete(self.get_cache_key("list"))
+            cache.delete(self.get_cache_key("stats"))
+            cache.delete(self.get_cache_key("approved"))
+            cache.delete(self.get_cache_key("featured"))
+
+            logger.info(f"Updated status for review #{pk} to {review.status}")
+
+            response_serializer = self.get_serializer(review)
+            return Response(
+                {
+                    "status": "success",
+                    "message": f"Review status updated to {review.get_status_display()}",
+                    "data": response_serializer.data,
+                }
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=["get"])
+    @method_decorator(cache_page(60 * 15))
+    def statistics(self, request):
+        """Get review statistics"""
+        logger.info("Fetching review statistics")
+
+        total = Review.objects.filter(is_active=True).count()
+        approved = Review.objects.filter(status="approved", is_active=True).count()
+        pending = Review.objects.filter(status="pending", is_active=True).count()
+        featured = Review.objects.filter(
+            is_featured=True, status="approved", is_active=True
+        ).count()
+
+        # Calculate average rating
+        from django.db.models import Avg
+
+        avg_rating = (
+            Review.objects.filter(status="approved", is_active=True).aggregate(
+                Avg("rating")
+            )["rating__avg"]
+            or 0
+        )
+
+        # Count by destination
+        by_destination = {}
+        for dest, display in Review.DESTINATION_CHOICES:
+            count = Review.objects.filter(
+                destination=dest, status="approved", is_active=True
+            ).count()
+            by_destination[dest] = {"count": count, "display_name": display}
+
+        # Count by rating
+        by_rating = {}
+        for i in range(1, 6):
+            count = Review.objects.filter(
+                rating=i, status="approved", is_active=True
+            ).count()
+            by_rating[f"{i}_star"] = count
+
+        stats = {
+            "total_reviews": total,
+            "approved_reviews": approved,
+            "pending_reviews": pending,
+            "average_rating": round(avg_rating, 2),
+            "featured_reviews": featured,
+            "by_destination": by_destination,
+            "by_rating": by_rating,
+        }
+
+        return Response(stats)
+
+    @action(detail=False, methods=["get"])
+    @method_decorator(cache_page(60 * 10))
+    def approved(self, request):
+        """Get only approved reviews"""
+        logger.info("Fetching approved reviews")
+
+        reviews = Review.objects.filter(status="approved", is_active=True).order_by(
+            "-created_at"
+        )
+
+        page = self.paginate_queryset(reviews)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    @method_decorator(cache_page(60 * 10))
+    def featured(self, request):
+        """Get featured reviews"""
+        logger.info("Fetching featured reviews")
+
+        reviews = Review.objects.filter(
+            is_featured=True, status="approved", is_active=True
+        ).order_by("-created_at")
+
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(
+            {
+                "status": "success",
+                "count": len(serializer.data),
+                "data": serializer.data,
+            }
+        )
+
+    @action(detail=False, methods=["get"], url_path="by-destination")
+    def by_destination(self, request):
+        """Get reviews by destination"""
+        destination = request.query_params.get("destination", None)
+
+        if not destination:
+            return Response(
+                {"error": "destination parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        logger.info(f"Fetching reviews for destination: {destination}")
+
+        reviews = Review.objects.filter(
+            destination=destination, status="approved", is_active=True
+        ).order_by("-created_at")
+
+        page = self.paginate_queryset(reviews)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(reviews, many=True)
+        return Response(serializer.data)
